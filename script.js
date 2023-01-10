@@ -1,5 +1,5 @@
 const clientId = "2882f838873f4ecd98e6d20250f1934c";
-const redirectUri = "sowbyspencer.github.io/SPY";
+const redirectUri = "https;//sowbyspencer.github.io/SPY";
 
 let accessToken;
 let userId;
