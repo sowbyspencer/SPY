@@ -5,7 +5,7 @@ let accessToken;
 let userId;
 
 const authorize = async () => {
-    const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=playlist-modify-public&response_type=token&state=123`;
+    const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=playlist-modify-public&response_type=token&state=123`;
     window.location.href = authorizeUrl;
 };
 
