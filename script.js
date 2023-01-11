@@ -196,7 +196,7 @@ const addPlaylistInput = () => {
 
     const input = document.createElement("input");
     input.type = "text"
-    input.placeholder = "Enter Spotify playlist URL";
+    input.placeholder = "https://open.spotify.com/playlist/";
     document.getElementById("playlist-inputs").appendChild(input);
 };
 
