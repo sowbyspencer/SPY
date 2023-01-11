@@ -1,6 +1,6 @@
 const clientId = "2882f838873f4ecd98e6d20250f1934c";
-const redirectUri = "https://sowbyspencer.github.io/spotify/";
-// const redirectUri = "http://127.0.0.1:5500/index.html"
+// const redirectUri = "https://sowbyspencer.github.io/spotify/";
+const redirectUri = "http://127.0.0.1:5500/index.html"
 
 //Saved?
 
@@ -30,9 +30,11 @@ const createPlaylist = async (e) => {
 
     // Initialize a set to store all the tracks
     let lists = [];
+    let names = [];
 
     for (const playlistUri of playlistUris) {
-        const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistUri.split("/")[4]}/tracks`, {
+        let id = playlistUri.split("/")[4].slice(0, 22)
+        const res = await fetch(`https://api.spotify.com/v1/playlists/${id}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -42,8 +44,9 @@ const createPlaylist = async (e) => {
         const data = await res.json();
 
         // Extract the track IDs from the tracks and add them to the set
-        trackUris = data.items.map((item) => item.track.uri);
+        trackUris = data.tracks.items.map((item) => item.track.uri);
         lists.push(trackUris);
+        names.push(data.name);
     }
 
 
@@ -124,6 +127,9 @@ const createPlaylist = async (e) => {
         intersection = intersection.filter(item => lists[i].includes(item));
     }
 
+    // let Q1 = intersection.slice(0, 25);
+    let Q1 = intersection;
+
 
 
     let pName = document.getElementById("playlist-name").value;
@@ -147,7 +153,7 @@ const createPlaylist = async (e) => {
             },
             body: JSON.stringify({
                 name: pName,
-                description: "Songs that are on all selected playlists"
+                description: `Songs that are on all selected playlists: ${names.join(', ')}`
             }),
         });
 
@@ -158,7 +164,7 @@ const createPlaylist = async (e) => {
 
 
         try {
-            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${intersection.join(',')}`, {
+            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${Q1.join(',')}`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -184,9 +190,13 @@ const createPlaylist = async (e) => {
 }
 
 const addPlaylistInput = () => {
+    const label = document.createElement("label");
+    label.innerText = "Enter Spotify playlist URL";
+    document.getElementById("playlist-inputs").appendChild(label);
+
     const input = document.createElement("input");
     input.type = "text"
-    input.placeholder = "Enter Spotify playlist URI";
+    input.placeholder = "Enter Spotify playlist URL";
     document.getElementById("playlist-inputs").appendChild(input);
 };
 
@@ -197,8 +207,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!accessToken) {
         document.getElementById("playlist-form").style.display = "none";
         console.log("No accessToken");
+        responseEl.innerHTML = `No accessToken`;
     } else {
         document.getElementById("playlist-form").style.display = "block";
+        document.getElementById("login-button").style.display = "none";
         fetch("https://api.spotify.com/v1/me", {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -207,12 +219,8 @@ document.addEventListener("DOMContentLoaded", () => {
             .then((res) => res.json())
             .then((data) => {
                 userId = data.id;
-                document
-                    .getElementById("add-playlist")
-                    .addEventListener("click", addPlaylistInput);
-                document
-                    .getElementById("playlist-form")
-                    .addEventListener("submit", createPlaylist);
+                document.getElementById("add-playlist").addEventListener("click", addPlaylistInput);
+                document.getElementById("playlist-form").addEventListener("submit", createPlaylist);
             });
     }
 });
