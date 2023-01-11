@@ -9,8 +9,12 @@
       <h1>Create Common Tracks Playlist</h1>
       <button id="login-button" type="button">Login with Spotify</button>
       <form id="playlist-form" style="display:none;">
-        <div id="playlist-inputs"></div>
+        <div id="playlist-inputs">
+          <input type="text" placeholder="Enter Spotify playlist URI" value="https://open.spotify.com/playlist/1AVD14NAYMPcKhEMurA9f0">
+          <input type="text" placeholder="Enter Spotify playlist URI" value="https://open.spotify.com/playlist/3lOBlbsMJaqRizd5MzGOhc">
+        </div>
         <button type="button" id="add-playlist">Add Playlist</button>
+        <input id="playlist-name" type="text" placeholder="Name your playlist">
         <button id="create_playlist" type="submit">Create Playlist</button>
       </form>
       <div id="response"></div>

@@ -1,11 +1,12 @@
 const clientId = "2882f838873f4ecd98e6d20250f1934c";
 const redirectUri = "https://sowbyspencer.github.io/SPY/";
+// const redirectUri = "http://127.0.0.1:5500/index.html"
 
 let accessToken;
 let userId;
 
 const authorize = async () => {
-    const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=playlist-modify-public&response_type=token&state=123`;
+    const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=playlist-modify-public playlist-modify-private&response_type=token&state=123&show_dialog=true`;
     window.location.href = authorizeUrl;
 };
 
@@ -26,10 +27,11 @@ const createPlaylist = async (e) => {
     const playlistUris = Array.from(playlistInputs).map((input) => input.value);
 
     // Initialize a set to store all the tracks
-    let allTracks = new Set();
+    let allTracks = [];
+    let lists = [];
 
     for (const playlistUri of playlistUris) {
-        const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistUri.split(":")[2]}/tracks`, {
+        const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistUri.split("/")[4]}/tracks`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -37,9 +39,19 @@ const createPlaylist = async (e) => {
         const data = await res.json();
 
         // Extract the track IDs from the tracks and add them to the set
-        const trackIds = data.items.map((item) => item.track.id);
-        allTracks = new Set([...allTracks, ...trackIds]);
+        trackUris = data.items.map((item) => item.track.uri);
+        lists.push(trackUris);
     }
+
+    let intersection = lists[0];
+
+    for (let i = 1; i < lists.length; i++) {
+        intersection = intersection.filter(item => lists[i].includes(item));
+    }
+
+
+
+    const pName = document.getElementById("playlist-name").value;
 
     // Create a new playlist
     const res = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
@@ -49,27 +61,39 @@ const createPlaylist = async (e) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            name: "Common Tracks",
+            name: pName,
             description: "Songs that are on all selected playlists"
         }),
     });
     const data = await res.json();
     const playlistId = data.id;
 
-    // Add songs to the new playlist
-    await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-        {
-            method: "POST",
+    const songUris = ['spotify:track:4iV5W9uYEdYUVa79Axb7Rh', 'spotify:track:1301WleyT98MSxVHPZCA6M'];
+
+    try {
+        const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${intersection.join(',')}`, {
+            method: 'POST',
             headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                uris: [...allTracks],
-            }),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error(response.statusText);
         }
-    );
+        console.log('Songs added to playlist!');
+    } catch (error) {
+        console.log('Error adding songs to playlist:', error);
+    }
+
+
+
+
+
+
 
     // Display success message
     const response = document.getElementById("response");
@@ -79,6 +103,7 @@ const createPlaylist = async (e) => {
 
 const addPlaylistInput = () => {
     const input = document.createElement("input");
+    input.type = "text"
     input.placeholder = "Enter Spotify playlist URI";
     document.getElementById("playlist-inputs").appendChild(input);
 };
