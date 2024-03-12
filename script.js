@@ -1,17 +1,27 @@
 const clientId = "2882f838873f4ecd98e6d20250f1934c";
-const redirectUri = "https://sowbyspencer.github.io/spotify/";
-// const redirectUri = "http://127.0.0.1:5500/index.html"
+// const redirectUri = "https://sowbyspencer.github.io/spotify/";
+const redirectUri = "http://127.0.0.1:5500/index.html"
 
 //Saved?
 
 let accessToken;
 let userId;
 
+/**
+ * The function `authorize` redirects the user to the Spotify authorization page
+ * with specific parameters.
+ */
 const authorize = async () => {
     const authorizeUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=playlist-modify-public playlist-modify-private&response_type=token&state=123&show_dialog=true`;
     window.location.href = authorizeUrl;
 };
 
+/**
+ * The function `getHashParams` extracts and decodes hash parameters from the URL
+ * in JavaScript.
+ * @returns The `getHashParams` function returns an object containing key-value
+ * pairs parsed from the hash parameters in the URL of the current window.
+ */
 const getHashParams = () => {
     const hashParams = {};
     let e,
@@ -23,6 +33,15 @@ const getHashParams = () => {
     return hashParams;
 };
 
+/**
+ * The function `createPlaylist` in JavaScript fetches tracks from multiple
+ * Spotify playlists, finds the common tracks, creates a new playlist with those
+ * tracks, and adds them to the playlist.
+ * @param e - The `e` parameter in your `createPlaylist` function is typically an
+ * event object that represents an event that occurs in the DOM, such as a form
+ * submission. In this case, it seems like the function is intended to handle a
+ * form submission event, as indicated by `e.preventDefault()` at the
+ */
 const createPlaylist = async (e) => {
     e.preventDefault();
     const playlistInputs = document.querySelectorAll("#playlist-inputs input");
@@ -132,6 +151,12 @@ const createPlaylist = async (e) => {
 
 
 
+    /* This code snippet is checking if the value of the input field with the id
+    "playlist-name" is empty. If the input field is empty (its length is 0), it
+    assigns the current date and time in a human-readable format (using `new
+    Date().toLocaleString()`) to the variable `pName`. This ensures that if the
+    user does not provide a name for the playlist, the current date and time
+    will be used as the default name. */
     let pName = document.getElementById("playlist-name").value;
     if (pName.length == 0) {
         pName = new Date().toLocaleString();
@@ -163,6 +188,10 @@ const createPlaylist = async (e) => {
         const playlistId = data.id;
 
 
+        /* The `try {` statement in JavaScript is used to start a block of code
+        that will be tested for errors while it is being executed. If an error
+        occurs within the `try` block, it will be caught by the subsequent
+        `catch` block, allowing for error handling and recovery. */
         try {
             const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?uris=${Q1.join(',')}`, {
                 method: 'POST',
@@ -189,6 +218,10 @@ const createPlaylist = async (e) => {
     }
 }
 
+/**
+ * The `addPlaylistInput` function dynamically creates a label and input field for
+ * entering a Spotify playlist URL.
+ */
 const addPlaylistInput = () => {
     const label = document.createElement("label");
     label.innerText = "Enter Spotify playlist URL";
@@ -200,6 +233,9 @@ const addPlaylistInput = () => {
     document.getElementById("playlist-inputs").appendChild(input);
 };
 
+/* This block of code is an event listener that waits for the DOM content to be
+fully loaded before executing the provided callback function. Once the DOM
+content is loaded, it performs the following actions: */
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("login-button").addEventListener("click", authorize);
     const params = getHashParams();
